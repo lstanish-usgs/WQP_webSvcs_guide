@@ -194,8 +194,8 @@ pre code {
 </ul>
 <p>The WQP web services are implemented using the ‘https’ protocol using REST, which provides a flexible and scalable approach for constructing standardized URL statements.</p>
 <p>Click <a href="https://github.com/project-open-data/project-open-data.github.io/blob/master/api-basics.md">here</a> to learn more about the basics of APIs, or check out this <a href="https://github.com/18F/API-All-the-X/tree/master/pages">Github page</a> for details about how APIs are implemented within the USGS and across the federal government.</p>
-<div id="accessing-data-programmatically-using-web-services" class="section level3">
-<h3>Accessing Data Programmatically Using Web Services</h3>
+<div id="accessing-data-programmatically-through-web-services" class="section level3">
+<h3>Accessing Data Programmatically Through Web Services</h3>
 <p>Web services provide a public resource which users can also enhance with their own custom scripts.</p>
 <p>One resource created by the USGS is an R-based software package called <em>dataRetrieval</em>, which makes it easier for R users to use the WQP web services. <em>dataRetrieval</em> does the heavy lifting to download data and convert it into a familiar and usable format. <em>dataRetrevial</em> can download data from the WQP and from a number of USGS NWIS services. To learn more about <em>dataRetrieval</em>, please check out these resources:</p>
 <ul>
@@ -217,7 +217,6 @@ pre code {
 <li>Base URL for downloading activity metric data: <code>https://www.waterqualitydata.us/data/ActivityMetric/search?</code></li>
 </ul>
 <p>Construct a query by concatenating the base URL with the desired parameters and arguments,as shown in <strong><em>Table 1</em></strong>. At least one parameter-argument pair must be specified. Separate multiple parameter-argument pairs with an <em>ampersand</em> (“&amp;”). For downloads, if no file format (<em>mime type</em>) is specified, the retrieval will default to <strong>WQX-XML format</strong>. See the <a href="http://www.waterqualitydata.us/portal_userguide.jsp">WQP User Guide</a> for a list of elements included in the result retrievals.</p>
-<p><span style="color:red;">(Modify as needed to be accurate: To learn more about constructing Web Services calls, check out the interactive tool available in the WQP User Guide. Users can play with the input parameters (filters) and see how the queries change.)</span></p>
 <strong><em>Table 1.</em> URL-encoded retrieval parameters and arguments for WQP web services (parameter names are case-insensitive only to the leading capital letter)</strong>
 <details>
 <summary>
@@ -382,25 +381,9 @@ Expand Table
 <td align="center"><em>biological</em></td>
 <td align="center">Only affects results endpoint at this time. The biological dataProfile returns an extended set of columns that further describe biological data.</td>
 </tr>
-<tr class="even">
-<td align="center"><strong>DEPRECATED COMMANDS</strong></td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr class="odd">
-<td align="center">command.avoid</td>
-<td align="center"><em>EPA|NWIS</em></td>
-<td align="center">Deprecated! By default, requests are submitted to all the data providers. This deprecated command is replaced by “providers”. To support legacy applications, command.avoid=NWIS maps to providers=EPA, and command.avoid=EPA maps to providers=NWIS.</td>
-</tr>
-<tr class="even">
-<td align="center">mimeType</td>
-<td align="center"><em>xls</em></td>
-<td align="center">Deprecated in favor of xlsx. The xls format had a limit of 63,000 rows, not practical for most wqp downloads.</td>
-</tr>
 </tbody>
 </table>
 </details>
-<p><span style="color:red;">(KEEP DEPRECATED COMMANDS IN TABLE 1?)</span></p>
 <div id="example-web-service-requests" class="section level3">
 <h3>Example Web Service Requests</h3>
 <p>To try out the following examples of REST web service requests, copy and paste into a web browser.</p>
@@ -413,14 +396,17 @@ Expand Table
 </blockquote>
 <p><code>https://www.waterqualitydata.us/data/Station/search?characteristicName=Caffeine&amp;mimeType=kml&amp;bBox=-92.8,44.2,-88.9,46.0&amp;zip=yes</code></p>
 <blockquote>
+<p><em>Example:</em> REST web service request to retrieve stream sites located in the state of Wyoming (USA) where parameters of the characteristicType <em>Nutrient</em> were measured, in <em>GeoJSON</em> format:</p>
+</blockquote>
+<p><code>https://www.waterqualitydata.us/data/Station/search?countrycode=US&amp;statecode=US%3A56&amp;siteType=Stream&amp;characteristicType=Nutrient&amp;mimeType=geojson</code></p>
+<blockquote>
 <p><em>Example:</em> REST web service request to retrieve <em>Caffeine</em> sample results from sites contained within a <em>bounding box</em> and <em>collected on, or after, 10-01-2006</em> in <em>MS-Excel</em> format, <em>zipped</em>:</p>
 </blockquote>
 <p><code>https://www.waterqualitydata.us/data/Result/search?characteristicName=Caffeine&amp;bBox=-92.8,44.2,-88.9,46.0&amp;startDateLo=10-01-2006&amp;mimeType=xlsx&amp;zip=yes</code></p>
 </div>
-<div id="using-post-instead-of-get" class="section level3">
-<h3>Using POST instead of GET</h3>
-<p><span style="color:red;">(What’s the purpose of this section? We don’t have examples using GET, which makes me wonder why we provide examples using POST. It seems like GET <em>should</em> be the standard approach, right? Can we elaborate on why POST would be used rather than GET? ANd if we keep POST examples, should we also add GET examples?)</span></p>
-<p>Water Quality Portal services can be accessed using an http POST instead of an https GET. POST requests should be submitted with a JSON-formatted payload. This is particularly helpful when submitting large lists of sites. (what does the sentence above mean? Let’s expand on why POST is the right request to make when you have a large list of sites)</p>
+<div id="queries-using-post" class="section level3">
+<h3>Queries Using POST</h3>
+<p>In certain situations when very long requests are submitted - for example, when querying data for a large list of sites - GET requests can fail due to limits in the allowable length of the request. These requests can instead be completed using http POST. POST requests should be submitted with a JSON-formatted payload.</p>
 <p>Here’s an example <em>JSON</em> object, including an organization ID and three site ID’s:</p>
 <pre><code>{
 &quot;organization&quot;: [&quot;WIDNR_WQX&quot;],
@@ -434,7 +420,6 @@ Expand Table
 <div id="using-open-geospatial-consortium-services-to-map-water-quality-portal-sites-based-on-water-quality-portal-parameters" class="section level3">
 <h3>Using Open Geospatial Consortium Services to map Water Quality Portal sites based on Water Quality Portal Parameters</h3>
 <p>The Water Quality Portal has an endpoint for generating OGC-Compliant Geospatial web services. At this time, <a href="http://docs.geoserver.org/stable/en/user/services/wms/reference.html">Web Mapping Service (WMS)</a> version 1.1.1 and <a href="http://docs.geoserver.org/stable/en/user/services/wfs/reference.html">Web Feature Service (WFS)</a> version 1.1.1 are supported. The service is a customized version of the WMS and WFS services provided by <a href="http://www.geoserver.org/">Geoserver</a>. To get started, check out the Geoserver WMS Reference and WFS Reference. The base URL for both the WMS and WFS services is:</p>
-<p><span style="color:red;">(This might be too technical, but I believe the API addresses are URIs and not URLs. Probably most people wouldn’t notice, but if we want to be technically accurate, I suppose we should change references from URL to URI. Thoughts?)</span></p>
 <p><code>https://www.waterqualitydata.us/ogcservices/{wms|wfs}</code></p>
 <p>Use web mapping tools, such as <em>Leaflet</em> or <em>Openlayers</em>, to easily connect to these web map services. GIS tools such as <em>ArcGIS</em> and <em>QGIS</em> also connect to these web maps services.</p>
 <p>WFS and WMS services require an additional parameter, called “SearchParams”, which is a URL-encoded version of the WQP search parameters. The service supports calls up to up to 250,000 sites. Calls that return large numbers of sites will take longer to load for the first time, as a cache is populated; subsequent responses will be much quicker. The cache is cleared after new data are loaded to the portal (once a day, at night).</p>

@@ -40,7 +40,7 @@ The WQP web services are implemented using the 'https' protocol using REST, whic
 Click [here](https://github.com/project-open-data/project-open-data.github.io/blob/master/api-basics.md) to learn more about the basics of APIs, or check out this [Github page](https://github.com/18F/API-All-the-X/tree/master/pages) for details about how APIs are implemented within the USGS and across the federal government.
 
 
-### Accessing Data Programmatically Using Web Services
+### Accessing Data Programmatically Through Web Services
 
 Web services provide a public resource which users can also enhance with their own custom scripts.
 
@@ -65,9 +65,8 @@ Every request starts with a base URL: the base URL will vary depending on the ty
 * Base URL for downloading activity data: `https://www.waterqualitydata.us/data/Activity/search?`
 * Base URL for downloading activity metric data: `https://www.waterqualitydata.us/data/ActivityMetric/search?`
 
-Construct a query by concatenating the base URL with the desired parameters and arguments,as shown in ***Table 1***.  At least one parameter-argument pair must be specified. Separate multiple parameter-argument pairs with an *ampersand* ("&"). For downloads, if no file format (*mime type*) is specified, the retrieval will default to **WQX-XML format**. See the [WQP User Guide](http://www.waterqualitydata.us/portal_userguide.jsp) for a list of elements included in the result retrievals.
+Construct a query by concatenating the base URL with the desired parameters and arguments,as shown in ***Table 1***.  At least one parameter-argument pair must be specified. Separate multiple parameter-argument pairs with an *ampersand* ("&"). For downloads, if no file format (*mime type*) is specified, the retrieval will default to **WQX-XML format**. See the [WQP User Guide](http://www.waterqualitydata.us/portal_userguide.jsp) for a list of elements included in the result retrievals. 
 
-<span style="color:red;">(Modify as needed to be accurate: To learn more about constructing Web Services calls, check out the interactive tool available in the WQP User Guide. Users can play with the input parameters (filters) and see how the queries change.)</span>
 
 
 ***Table 1.* URL-encoded retrieval parameters and arguments for WQP web services (parameter names are case-insensitive only to the leading capital letter)**
@@ -105,13 +104,9 @@ Construct a query by concatenating the base URL with the desired parameters and 
 | providers           | *EPA\|NWIS\|STEWARDS ([allowable values](https://www.waterqualitydata.us/portal_userguide/#WQPUserGuide-Domain_Value)).*                                                                                                                                                                                                                                                                                                                                                                           | By default, requests are submitted to all the data providers. However, a particular provider may be specified using this parameter.                                                                                                                                                                                                                                                                                                                 |   |
 | sorted              | *yes\|no*                                                                                                                                                                                                                                                                                                                                                                                                                                        | By default, tabular data are sorted by organization, monitoringLocationID, and (for results) activityID. However, sorting increases response time significantly, sometimes by orders of magnitude. If you are doing your own sorting after download, set sorted=no. For large downloads (over 5 million rows) sorting is disabled by default to ensure reasonable response times. XML requests are always sorted to accommodate the WQX data schema. |   |
 | dataProfile         | *biological*                                                                                                                                                                                                                                                                                                                                                                                                                                     | Only affects results endpoint at this time. The biological dataProfile returns an extended set of columns that further describe biological data.                                                                                                                                                                                                                                                                                                     |   |
-| **DEPRECATED COMMANDS** |                                                                                                                                                                                                                                                                                                                                                                                                                                                |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |   |
-| command.avoid       | *EPA\|NWIS*                                                                                                                                                                                                                                                                                                                                                                                                                                   | Deprecated! By default, requests are submitted to all the data providers. This deprecated command is replaced by "providers". To support legacy applications, command.avoid=NWIS maps to providers=EPA, and command.avoid=EPA maps to providers=NWIS.                                                                                                                                                                                          |   |
-| mimeType            | *xls*                                                                                                                                                                                                                                                                                                                                                                                                                                            | Deprecated in favor of xlsx. The xls format had a limit of 63,000 rows, not practical for most wqp downloads.                                                                                                                                                                                                                                                                                                                                       |   |
 
 </details>
 
-<span style="color:red;">(KEEP DEPRECATED COMMANDS IN TABLE 1?)</span>
 
 
 ### Example Web Service Requests
@@ -127,17 +122,19 @@ To try out the following examples of REST web service requests, copy and paste i
 
 `https://www.waterqualitydata.us/data/Station/search?characteristicName=Caffeine&mimeType=kml&bBox=-92.8,44.2,-88.9,46.0&zip=yes` 
 
+>*Example:* REST web service request to retrieve stream sites located in the state of Wyoming (USA) where parameters of the characteristicType *Nutrient* were measured, in *GeoJSON* format:
+
+`https://www.waterqualitydata.us/data/Station/search?countrycode=US&statecode=US%3A56&siteType=Stream&characteristicType=Nutrient&mimeType=geojson` 
+
 >*Example:* REST web service request to retrieve *Caffeine* sample results from sites contained within a *bounding box* and *collected on, or after, 10-01-2006* in *MS-Excel* format, *zipped*:
 
 `https://www.waterqualitydata.us/data/Result/search?characteristicName=Caffeine&bBox=-92.8,44.2,-88.9,46.0&startDateLo=10-01-2006&mimeType=xlsx&zip=yes` 
 
 
 
-### Using POST instead of GET
-<span style="color:red;">(What's the purpose of this section? We don't have examples using GET, which makes me wonder why we provide examples using POST. It seems like GET *should* be the standard approach, right? Can we elaborate on why POST would be used rather than GET? ANd if we keep POST examples, should we also add GET examples?)</span>
+### Queries Using POST
 
-Water Quality Portal services can be accessed using an http POST instead of an https GET. POST requests should be submitted with a JSON-formatted payload. This is particularly helpful when submitting large lists of sites.
-(what does the sentence above mean? Let's expand on why POST is the right request to make when you have a large list of sites)
+In certain situations when very long requests are submitted - for example, when querying data for a large list of sites - GET requests can fail due to limits in the allowable length of the request. These requests can instead be completed using http POST. POST requests should be submitted with a JSON-formatted payload.
 
 Here's an example *JSON* object, including an organization ID and three site ID's:
 
@@ -162,8 +159,6 @@ The --header argument lists metadata for the web service and ensures that the co
 ### Using Open Geospatial Consortium Services to map Water Quality Portal sites based on Water Quality Portal Parameters
 
 The Water Quality Portal has an endpoint for generating OGC-Compliant Geospatial web services. At this time, [Web Mapping Service (WMS)](http://docs.geoserver.org/stable/en/user/services/wms/reference.html) version 1.1.1 and [Web Feature Service (WFS)](http://docs.geoserver.org/stable/en/user/services/wfs/reference.html) version 1.1.1 are supported. The service is a customized version of the WMS and WFS services provided by [Geoserver](http://www.geoserver.org/). To get started, check out the Geoserver WMS Reference and WFS Reference. The base URL for both the WMS and WFS services is:
-
-<span style="color:red;">(This might be too technical, but I believe the API addresses are URIs and not URLs. Probably most people wouldn't notice, but if we want to be technically accurate, I suppose we should change references from URL to URI. Thoughts?)</span>
 
 `https://www.waterqualitydata.us/ogcservices/{wms|wfs}`
 
